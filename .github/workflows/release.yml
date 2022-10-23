@@ -32,14 +32,6 @@ jobs:
           sed "s/^version = \".*\"\$/version = \"$version\"/" ./Cargo.toml > /tmp/cargo.toml
           mv /tmp/cargo.toml ./Cargo.toml
 
-      - name: "Commit version bump"
-        uses: stefanzweifel/git-auto-commit-action@v4
-        with:
-          commit_message: "chore: Bump version for release"
-          file_pattern: "*.toml"
-          commit_user_name: "github-actions[bot]"
-          commit_user_email: "github-actions[bot]@users.noreply.github.com"
-
       - name: "Install Rust toolchain (stable)"
         uses: actions-rs/toolchain@v1
         with:
