@@ -88,6 +88,9 @@ pub enum Error {
 
     #[error("invalid tenant id: {0}")]
     InvalidTenantId(String),
+
+    #[error("Failed to unwrap a mutex as it was poisoned")]
+    MutexPoison,
 }
 
 impl IntoResponse for Error {

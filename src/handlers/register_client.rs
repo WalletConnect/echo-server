@@ -1,4 +1,6 @@
-use crate::error::Error::{ClientAlreadyRegistered, EmptyField, IncludedTenantIdWhenNotNeeded, ProviderNotAvailable};
+use crate::error::Error::{
+    ClientAlreadyRegistered, EmptyField, IncludedTenantIdWhenNotNeeded, ProviderNotAvailable,
+};
 use crate::error::Result;
 use crate::handlers::Response;
 use crate::state::{AppState, State};
@@ -22,7 +24,7 @@ pub async fn handler(
     Json(body): Json<RegisterBody>,
 ) -> Result<Response> {
     if state.config.default_tenant_id != tenant_id && !state.is_multitenant() {
-        return Err(IncludedTenantIdWhenNotNeeded)
+        return Err(IncludedTenantIdWhenNotNeeded);
     }
 
     let push_type = body.push_type.as_str().try_into()?;

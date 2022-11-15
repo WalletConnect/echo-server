@@ -4,13 +4,13 @@ use crate::error::Result;
 use crate::providers::apns::ApnsProvider;
 use crate::providers::fcm::FcmProvider;
 use crate::providers::noop::NoopProvider;
-use crate::providers::Provider::{Apns, Fcm, Noop};
-use crate::providers::{Provider, ProviderKind};
+use crate::providers::ProviderKind;
+use crate::providers::PushProvider;
 use async_trait::async_trait;
 use chrono::{DateTime, Utc};
 use sqlx::PgPool;
 use std::io::BufReader;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 
 #[derive(sqlx::FromRow, Debug, Eq, PartialEq, Clone)]
 pub struct Tenant {
@@ -46,7 +46,7 @@ impl Tenant {
         supported
     }
 
-    pub fn provider(&self, provider: &ProviderKind) -> Result<Provider> {
+    pub fn provider(&self, provider: &ProviderKind) -> Result<Arc<Mutex<dyn PushProvider>>> {
         if !self.providers().contains(provider) {
             return Err(ProviderNotAvailable(provider.into()));
         }
@@ -73,7 +73,7 @@ impl Tenant {
                             topic.clone(),
                         )?;
 
-                        Ok(Apns(apns_client))
+                        Ok(Arc::new(Mutex::new(apns_client)))
                     }
                     _ => Err(ProviderNotAvailable(provider.into())),
                 }
@@ -81,12 +81,12 @@ impl Tenant {
             ProviderKind::Fcm => match self.fcm_api_key.clone() {
                 Some(api_key) => {
                     let fcm = FcmProvider::new(api_key);
-                    Ok(Fcm(fcm))
+                    Ok(Arc::new(Mutex::new(fcm)))
                 }
                 None => Err(ProviderNotAvailable(provider.into())),
             },
             #[cfg(any(debug_assertions, test))]
-            ProviderKind::Noop => Ok(Noop(NoopProvider::new())),
+            ProviderKind::Noop => Ok(Arc::new(Mutex::new(NoopProvider::new()))),
         }
     }
 }
