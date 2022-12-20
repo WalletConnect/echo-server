@@ -50,6 +50,14 @@ yarn install
 yarn integration:dev # or yarn integration:staging
 ```
 
+## Deploying infrastructure
+
+```
+terraform -chdir=terraform init
+terraform -chdir=terraform workspace select dev/staging/prod
+terraform -chdir=terraform apply  -var-file="vars/$(terraform -chdir=terraform workspace show).tfvars"
+```
+
 ## Contact
 If you wish to integrate Push functionality into your Wallet (only available on v2), please contact us.
 
